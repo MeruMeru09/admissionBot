@@ -71,8 +71,8 @@ def handle_conversation(csv_path):
 # function to handle GUI
 def main():
     # Streamlit set up
-    st.set_page_config(page_title="Megatron", page_icon="🤖")
-    st.title("Megatron, Admissions Buddy :books:")
+    st.set_page_config(page_title="Margatron", page_icon="🤖")
+    st.title("Margatron, Admissions Buddy :books:")
     st.write("Hello, how may I help you?")
 
     # Provide the path to your CSV file here
