@@ -30,10 +30,19 @@ def query_gemini_api(csv_path, user_input):
     
     model = genai.GenerativeModel("gemini-1.5-flash")
     
-    # Send the CSV content and user query to the Gemini API for content generation
-    response = model.generate_content([f"Give me an answer based on this data and the query: {user_input}", csv_content])
+    if user_input.lower() in ["hi", "hello", "hey", "greetings"]:
+        prompt = "Hello! How can I assist you with admission information today?"
+    else:
+        prompt = f"Provide an answer based on this data and the query. Make it concise.: '{user_input}'. {csv_content}"
+
+    # Send the user query and the CSV content to the Gemini API for response
+    response = model.generate_content([prompt, csv_content])
     
-    return response.text
+    if "Not found" in response.text or "Unavailable" in response.text or not response.text.strip():
+        return "I'm sorry, I couldn't find an answer to your question. Could you please rephrase it or ask something else?"
+    
+    
+    return response.text  # Assuming the API returns the text in this field
 
 # Function to handle the conversation
 def handle_conversation(csv_path):
