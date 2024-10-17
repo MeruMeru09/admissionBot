@@ -14,8 +14,10 @@ conda create --name myenv python=3.9 -- pang specify
 
 Pang activate:
 conda activate myenv
+
+
 ## Needed To DO in the terminal ##
-pip install google-generativeai streamlit python-dotenv
+pip install google-generativeai streamlit python-dotenv langdetect nltk
 
 
 ## Version Needed ##

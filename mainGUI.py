@@ -2,8 +2,14 @@ import csv
 import google.generativeai as genai
 import os
 from pathlib import Path
+
+# to deal with gui and secret keys
 import streamlit as st
 from dotenv import load_dotenv # comment out if diritso API_KEY from command line
+
+# to deal with nonesense
+import nonesenseChecking as nc
+
 
 # load the API KEY -- remove if command line
 load_dotenv()
@@ -13,6 +19,7 @@ api_key = os.getenv('API_KEY')
 
 # Configure the Gemini API using the API key from the environment variable
 genai.configure(api_key=api_key)
+
 
 # Extract data from a CSV file
 def extract_text_from_csv(csv_path):
@@ -24,25 +31,44 @@ def extract_text_from_csv(csv_path):
             csv_content += ' '.join(row) + "\n"
     return csv_content
 
+
 # Use the Gemini API to generate a response based on the CSV content and user input
 def query_gemini_api(csv_path, user_input):
+    # gives out the tone the bot should respond
+    tone = "Respond in a formal and professional manner and give out any links if needed."
     csv_content = extract_text_from_csv(csv_path)
     
     model = genai.GenerativeModel("gemini-1.5-flash")
-    
-    if user_input.lower() in ["hi", "hello", "hey", "greetings"]:
-        prompt = "Hello! How can I assist you with admission information today?"
-    else:
-        prompt = f"Provide an answer based on this data and the query. Make it concise.: '{user_input}'. {csv_content}"
 
-    # Send the user query and the CSV content to the Gemini API for response
-    response = model.generate_content([prompt, csv_content])
+    user_input = user_input.strip().lower()
     
-    if "Not found" in response.text or "Unavailable" in response.text or not response.text.strip():
-        return "I'm sorry, I couldn't find an answer to your question. Could you please rephrase it or ask something else?"
+    # keywords
+    greeting_keywords = ["hi", "hello", "hey", "greetings"]
+    accepted_phrases = ["payment methods", "admissions", "requirements", "tuition fees"]
+
+    # if it is found
+    if any(keyword in user_input for keyword in greeting_keywords):
+        return "Hello! How can I assist you with admission information today?" 
+    elif any(phrase in user_input for phrase in accepted_phrases):
+        response = model.generate_content([f"{tone} Give me an answer based on this data and the query: {user_input}", csv_content])
+
+    # Nonsense input check 
+    elif nc.is_mathematical_expression(user_input):
+        return "I'm sorry, I can't help you with that. Could you please ask something else or clarify your question?"
+    elif nc.is_nonsensical_input(user_input):
+        return "I'm sorry, I can't help you with that. Could you please ask something else or clarify your question?"
+    
+    else:
+        response = model.generate_content([f"{tone} Give me an answer based on this data and the query: {user_input}", csv_content])
     
     
-    return response.text  # Assuming the API returns the text in this field
+    response = response.text
+
+    if "Not found" in response or "Unavailable" in response or not response.strip():
+        return "I'm sorry, I couldn't find an answer to your question. Could you please rephrase it or ask something else?" 
+    
+    return response  # Assuming the API returns the text in this field
+
 
 # Function to handle the conversation
 def handle_conversation(csv_path):
@@ -60,7 +86,7 @@ def handle_conversation(csv_path):
 
     if user_input:
         # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.session_state.messages.append({"role": "user", "content": user_input}) 
 
         # Display user message in chat message container
         with st.chat_message("user"): # we can change this. this is the icon for the human
