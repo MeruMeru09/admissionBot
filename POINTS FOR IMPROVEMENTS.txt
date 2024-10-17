@@ -1,0 +1,10 @@
+**PATCH NOTES**
+
+1. Make GUI better
+    - the icons for both human and assistant
+    - title page, icon sa website bar
+
+2. Unsaon pag make sa repo na hinlo haha
+    - samok siya. mabuang if mag himo ko ug new folder para storage sa docs
+    
+3. break it some more hahaha
