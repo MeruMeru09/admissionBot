@@ -1,6 +1,3 @@
-os
-csv
-pathlib
 google-generativeai
 streamlit
 python-dotenv
