@@ -3,9 +3,9 @@ import google.generativeai as genai
 import os
 from pathlib import Path
 import streamlit as st
-from dotenv import load_dotenv # comment out
+from dotenv import load_dotenv # comment out if diritso API_KEY from command line
 
-# load the API KEY
+# load the API KEY -- remove if command line
 load_dotenv()
 
 # Access the API_KEY environment variable
@@ -33,7 +33,7 @@ def query_gemini_api(csv_path, user_input):
     # Send the CSV content and user query to the Gemini API for content generation
     response = model.generate_content([f"Give me an answer based on this data and the query: {user_input}", csv_content])
     
-    return response.text  # Assuming the API returns the text in this field
+    return response.text
 
 # Function to handle the conversation
 def handle_conversation(csv_path):
@@ -46,7 +46,7 @@ def handle_conversation(csv_path):
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Capture user input
+    # Capture user input -- mao kibali ni asa dapit mag chat c user. mao sab ni mo appear sa chatbox
     user_input = st.chat_input("Ask questions regarding admissions. Please be specific...")
 
     if user_input:
@@ -54,14 +54,14 @@ def handle_conversation(csv_path):
         st.session_state.messages.append({"role": "user", "content": user_input})
 
         # Display user message in chat message container
-        with st.chat_message("user"):
+        with st.chat_message("user"): # we can change this. this is the icon for the human
             st.markdown(user_input)
 
         # Query the Gemini API with the user input
         result = query_gemini_api(csv_path, user_input)
 
         # Display assistant response in chat message container
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant"): # icon for assistant
             st.markdown(result)
 
         # Add assistant response to chat history
@@ -71,7 +71,7 @@ def handle_conversation(csv_path):
 # function to handle GUI
 def main():
     # Streamlit set up
-    st.set_page_config(page_title="Margatron", page_icon="🤖")
+    st.set_page_config(page_title="Margatron", page_icon="🤖") # pwde nato e himo as mmcm logo
     st.title("Margatron, Admissions Buddy :books:")
     st.write("Hello, how may I help you?")
 
