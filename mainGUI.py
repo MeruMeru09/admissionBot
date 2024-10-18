@@ -35,7 +35,7 @@ def extract_text_from_csv(csv_path):
 # Use the Gemini API to generate a response based on the CSV content and user input
 def query_gemini_api(csv_path, user_input):
     # gives out the tone the bot should respond
-    tone = "Respond in a formal and professional manner and give out any links if needed."
+    tone = "Respond in a formal and professional manner and give out any links if needed. Do not say anything about reading from a text."
     csv_content = extract_text_from_csv(csv_path)
     
     model = genai.GenerativeModel("gemini-1.5-flash")
@@ -44,22 +44,24 @@ def query_gemini_api(csv_path, user_input):
     
     # keywords
     greeting_keywords = ["hi", "hello", "hey", "greetings", "whats up", "what's up", "yo"]
-    accepted_phrases = ["payment methods", "admissions", "requirements", "tuition fees"]
+    accepted_phrases = ["payment methods", "admissions", "requirements", "tuition fees", "enroll", "school year"]
+    goodbye_words = ["thank you", "goodbye", "farewell"]
 
     # if it is found
-    if any(keyword in user_input for keyword in greeting_keywords):
+    if any(phrase in user_input.strip() for phrase in accepted_phrases):
+        response = model.generate_content([f"{tone}. Give me an answer based on this data and the query:  {user_input}", csv_content])
+    elif any(words in user_input.strip() for words in goodbye_words):
+        return "You are very much welcome! I am glad I could help!"
+    elif any(keyword in user_input.strip() for keyword in greeting_keywords):
         return "Hello! How can I assist you with admission information today?" 
-    elif any(phrase in user_input for phrase in accepted_phrases):
-        response = model.generate_content([f"{tone} Give me an answer based on this data and the query: {user_input}", csv_content])
+    
 
     # Nonsense input check 
-    elif nc.is_mathematical_expression(user_input):
-        return "I'm sorry, I can't help you with that. Could you please ask something else or clarify your question?"
-    elif nc.is_nonsensical_input(user_input):
+    elif (nc.is_mathematical_expression(user_input)) or (nc.is_nonsensical_input(user_input)):
         return "I'm sorry, I can't help you with that. Could you please ask something else or clarify your question?"
     
     else:
-        response = model.generate_content([f"{tone} Give me an answer based on this data and the query: {user_input}", csv_content])
+        response = model.generate_content([f"{tone}. Give me an answer based on this data and the query:  {user_input}", csv_content])
     
     
     response = response.text
@@ -67,7 +69,7 @@ def query_gemini_api(csv_path, user_input):
     if "Not found" in response or "Unavailable" in response or not response.strip():
         return "I'm sorry, I couldn't find an answer to your question. Could you please rephrase it or ask something else?" 
     
-    return response  # Assuming the API returns the text in this field
+    return response
 
 
 # Function to handle the conversation
@@ -111,7 +113,7 @@ def main():
     st.write("Hello, how may I help you?")
 
     # Provide the path to your CSV file here
-    csv_path = "scrapped_data1.csv"
+    csv_path = "scrapped_scholarship.csv"
     handle_conversation(csv_path)
 
 
